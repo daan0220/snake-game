@@ -2,7 +2,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.Random;
-
+import java.util.List; // List をインポート
+import java.util.ArrayList; // ArrayList
 public class GamePanel extends JPanel implements ActionListener {
 
     static final int SCREEN_WIDTH = 1300;
@@ -40,6 +41,7 @@ public class GamePanel extends JPanel implements ActionListener {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
+        drawObstacles(g); // 障害物を描画
     }
 
     public void draw(Graphics g) {
@@ -109,6 +111,19 @@ public class GamePanel extends JPanel implements ActionListener {
             bodyParts++;
             applesEaten++;
             newApple();
+            createObstacleIfNecessary(); // リンゴが取られた後に障害物を生成するかチェック
+
+        }
+    }
+
+    public void createObstacleIfNecessary() {
+        if (applesEaten > 2 && applesEaten % 3 == 0) {
+            if (applesEaten % 6 == 3) {
+                for (int i = 0; i < 3; i++) {
+                    createObstacle();
+                    System.out.println("障害物を生成");
+                }
+            }
         }
     }
 
@@ -119,6 +134,14 @@ public class GamePanel extends JPanel implements ActionListener {
                 running = false;
             }
         }
+
+        // Check if head collides with obstacles
+        for (Obstacle obstacle : obstacles) {
+            if (x[0] == obstacle.getX() && y[0] == obstacle.getY()) {
+                running = false;
+            }
+        }
+
         // check if head touches left border
         if (x[0] < 0) {
             running = false;
@@ -138,6 +161,23 @@ public class GamePanel extends JPanel implements ActionListener {
 
         if (!running) {
             timer.stop();
+        }
+    }
+    private List<Obstacle> obstacles = new ArrayList<>();
+
+    private void createObstacle() {
+        int obstacleX = random.nextInt(SCREEN_WIDTH / UNIT_SIZE) * UNIT_SIZE;
+        int obstacleY = random.nextInt(SCREEN_HEIGHT / UNIT_SIZE) * UNIT_SIZE;
+        int obstacleWidth = UNIT_SIZE;
+        int obstacleHeight = UNIT_SIZE;
+        Obstacle obstacle = new Obstacle(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
+        obstacles.add(obstacle);
+    }
+
+
+    private void drawObstacles(Graphics g) {
+        for (Obstacle obstacle : obstacles) {
+            obstacle.draw(g);
         }
     }
 
@@ -164,7 +204,6 @@ public class GamePanel extends JPanel implements ActionListener {
         }
         repaint();
     }
-
     public class MyKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {

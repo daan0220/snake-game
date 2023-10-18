@@ -8,8 +8,9 @@ public class LoginPanel extends JPanel {
     private final JPasswordField passwordField;
 
     public LoginPanel() {
+        // サイズを GamePanel のサイズと同じに設定
         setPreferredSize(new Dimension(GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT));
-        setLayout(new GridBagLayout());
+        setLayout(new GridBagLayout()); // GridBagLayout を使用してより細かな制御を行います
 
         // タイトルラベル
         JLabel titleLabel = new JLabel("Snake Game Login");
