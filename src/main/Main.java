@@ -1,9 +1,8 @@
 package main;
+
 import game.GamePanel;
-import welcome.WelcomePanel;
-
+import session.UserSession;
 import login.LoginPanel;
-
 import javax.swing.*;
 
 public class Main {
@@ -13,16 +12,11 @@ public class Main {
             JFrame frame = new JFrame("Snake Game");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-            // GamePanelを作成
-            GamePanel gamePanel = new GamePanel();
-            frame.getContentPane().add(gamePanel);
-
-            // WelcomePanelを作成
-            WelcomePanel welcomePanel = new WelcomePanel(frame);
-            frame.getContentPane().add(welcomePanel);
+            // UserSessionを作成
+            UserSession userSession = new UserSession();
 
             // LoginPanelを作成
-            LoginPanel loginPanel = new LoginPanel(frame);
+            LoginPanel loginPanel = new LoginPanel(frame, userSession);
             frame.getContentPane().add(loginPanel);
 
             // フレームのサイズを設定

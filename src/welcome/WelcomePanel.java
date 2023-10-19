@@ -6,11 +6,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import game.GamePanel;
 import Ranking.RankingPanel;
+import session.UserSession; // UserSession クラスをインポート
+
 public class WelcomePanel extends JPanel {
+    public static final int SCREEN_WIDTH = 800; // 800 は適切な幅に置き換えてください
+    public static final int SCREEN_HEIGHT = 600; // 600 は適切な高さに置き換えてください
+    private UserSession userSession; // UserSession クラスのインスタンスを保持
+
     private JFrame frame;
 
-    public WelcomePanel(JFrame frame) {
+    public WelcomePanel(JFrame frame, UserSession userSession) {
+        this.userSession = userSession;
         this.frame = frame;
+
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
@@ -25,7 +33,7 @@ public class WelcomePanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.getContentPane().removeAll();
-                GamePanel gamePanel = new GamePanel();
+                GamePanel gamePanel = new GamePanel(userSession, frame); // frame を渡す
                 frame.getContentPane().add(gamePanel);
                 gamePanel.requestFocusInWindow(); // フォーカスを設定
                 frame.setSize(GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
@@ -38,7 +46,7 @@ public class WelcomePanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.getContentPane().removeAll();
-                RankingPanel rankingPanel = new RankingPanel(frame); // RankingPanelを新たに作成
+                RankingPanel rankingPanel = new RankingPanel(frame, userSession);
                 frame.getContentPane().add(rankingPanel);
                 frame.setSize(GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
                 frame.revalidate();

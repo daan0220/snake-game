@@ -3,7 +3,7 @@ package login;
 import database.DatabaseConnector;
 import game.GamePanel;
 import welcome.WelcomePanel;
-
+import session.UserSession;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,12 +16,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LoginPanel extends JPanel {
+    private UserSession userSession; // UserSession クラスのインスタンスを保持
+
     private final JTextField usernameField;
     private final JPasswordField passwordField;
     private JFrame frame;
 
-    public LoginPanel(JFrame frame) {
+    public LoginPanel(JFrame frame, UserSession userSession) {
         this.frame = frame;
+        this.userSession = userSession; // UserSession クラスのインスタンスを初期化
         setLayout(new GridBagLayout());
 
         GridBagConstraints constraints = new GridBagConstraints();
@@ -76,11 +79,12 @@ public class LoginPanel extends JPanel {
                         ResultSet result = statement.executeQuery();
 
                         if (result.next()) {
+                            userSession.login(enteredUsername); // ログイン情報を UserSession に設定
                             JOptionPane.showMessageDialog(null, "Login successful!");
 
-                            // ログイン成功時にWelcomePanelに遷移
+                            // ログイン成功時に WelcomePanel に遷移
                             frame.getContentPane().removeAll();
-                            WelcomePanel welcomePanel = new WelcomePanel(frame);
+                            WelcomePanel welcomePanel = new WelcomePanel(frame, userSession);
                             frame.getContentPane().add(welcomePanel);
                             frame.setSize(GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
                             frame.revalidate();
@@ -96,5 +100,6 @@ public class LoginPanel extends JPanel {
                 }
             }
         });
+
     }
 }

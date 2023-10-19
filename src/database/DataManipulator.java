@@ -1,5 +1,7 @@
 package database;
 
+//新規ログイン時に使用
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;

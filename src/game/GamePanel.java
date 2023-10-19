@@ -1,11 +1,53 @@
 package game;
+import database.DatabaseConnector;
+import database.UserDatabaseManager;
+import login.LoginPanel;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Random;
 import java.util.List;
-import java.util.ArrayList; // ArrayList
+import java.util.ArrayList;
+import session.UserSession;
+import welcome.WelcomePanel;
+
 public class GamePanel extends JPanel implements ActionListener {
+    private JButton returnToWelcomeButton;
+    private JFrame parentFrame;
+
+    private UserSession userSession; // UserSession クラスのインスタンスを保持
+
+    public void gameEnded(int score, String username) {
+        // スコアとユーザー名を取得し、ゲーム結果を `rankings` テーブルに格納する
+        try {
+            Connection connection = DatabaseConnector.connect();
+            if (connection != null) {
+                String insertQuery = "INSERT INTO rankings (user_id, username, score) VALUES (?, ?, ?)";
+                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+
+                // パラメータを設定
+                UserDatabaseManager userDatabaseManager = new UserDatabaseManager(); // UserDatabaseManager クラスの新しいインスタンスを作成
+                int userId = userDatabaseManager.getUserIdByUsername(username); // インスタンスを使用してユーザーIDを取得
+                preparedStatement.setInt(1, userId);
+                preparedStatement.setString(2, username);
+                preparedStatement.setInt(3, score);
+
+                // クエリを実行
+                preparedStatement.executeUpdate();
+
+                // 接続をクローズ
+                preparedStatement.close();
+                DatabaseConnector.closeConnection(connection);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private LoginPanel loginPanel; // LoginPanelの参照を保持するための変数
+
     public static final int SCREEN_WIDTH = 1300;
     public static final int SCREEN_HEIGHT = 750;
     static final int UNIT_SIZE = 50;
@@ -22,14 +64,35 @@ public class GamePanel extends JPanel implements ActionListener {
     Timer timer;
     Random random;
 
-    public GamePanel() {
+    public GamePanel(UserSession userSession, JFrame parentFrame) {
+        this.parentFrame = parentFrame; // 親の JFrame を保持
+        this.userSession = userSession;
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.black);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
         startGame();
+        returnToWelcomeButton = new JButton("Welcome に戻る");
+        returnToWelcomeButton.setFont(new Font("Arial", Font.BOLD, 18));
+        returnToWelcomeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                returnToWelcome(); // "Welcome に戻る" ボタンがクリックされたときのアクション
+            }
+        });
+        GridBagConstraints constraints = new GridBagConstraints();
+
+        constraints.gridx = 0;
+        constraints.gridy = 3;
+        constraints.gridwidth = 2;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        add(returnToWelcomeButton, constraints);
+
+        // ボタンを最初は非表示にする
+        returnToWelcomeButton.setVisible(false);
     }
+
 
     public void startGame() {
         newApple();
@@ -180,6 +243,16 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
+    // returnToWelcome メソッドを次のように変更
+    private void returnToWelcome() {
+        parentFrame.getContentPane().removeAll();
+        WelcomePanel welcomePanel = new WelcomePanel(parentFrame, userSession);
+        parentFrame.getContentPane().add(welcomePanel);
+        parentFrame.setSize(WelcomePanel.SCREEN_WIDTH, WelcomePanel.SCREEN_HEIGHT);
+        parentFrame.revalidate();
+        parentFrame.repaint();
+    }
+
     public void gameOver(Graphics g) {
         // Score
         g.setColor(Color.red);
@@ -187,11 +260,15 @@ public class GamePanel extends JPanel implements ActionListener {
         FontMetrics metrics1 = getFontMetrics(g.getFont());
         g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics1.stringWidth("Score: " + applesEaten)) / 2,
                 g.getFont().getSize());
+
         // Game Over text
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics2.stringWidth("Game Over")) / 2, SCREEN_HEIGHT / 2);
+        returnToWelcomeButton.setVisible(true);
+
+        // ゲームが終了したときに gameEnded メソッドを呼び出す
     }
 
     @Override
