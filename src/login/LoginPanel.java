@@ -1,3 +1,9 @@
+package login;
+
+import database.DatabaseConnector;
+import game.GamePanel;
+import welcome.WelcomePanel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -6,37 +12,53 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LoginPanel extends JPanel {
     private final JTextField usernameField;
     private final JPasswordField passwordField;
+    private JFrame frame;
 
-    public LoginPanel() {
-        // レイアウトを設定
-        setLayout(new GridLayout(3, 2)); // グリッドレイアウトを使用
+    public LoginPanel(JFrame frame) {
+        this.frame = frame;
+        setLayout(new GridBagLayout());
 
-        // ユーザ名のラベルとテキストフィールド
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(5, 5, 5, 5);
+
         JLabel usernameLabel = new JLabel("Username:");
         usernameLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        add(usernameLabel);
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        add(usernameLabel, constraints);
+
         usernameField = new JTextField(20);
         usernameField.setFont(new Font("Arial", Font.PLAIN, 18));
-        add(usernameField);
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        add(usernameField, constraints);
 
-        // パスワードのラベルとテキストフィールド
         JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        add(passwordLabel);
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        add(passwordLabel, constraints);
+
         passwordField = new JPasswordField(20);
         passwordField.setFont(new Font("Arial", Font.PLAIN, 18));
-        add(passwordField);
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        add(passwordField, constraints);
 
-        // ログインボタン
         JButton loginButton = new JButton("Login");
         loginButton.setFont(new Font("Arial", Font.BOLD, 18));
-        add(loginButton);
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.gridwidth = 2;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        add(loginButton, constraints);
 
-        // ログインボタンのアクションリスナー
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -55,11 +77,19 @@ public class LoginPanel extends JPanel {
 
                         if (result.next()) {
                             JOptionPane.showMessageDialog(null, "Login successful!");
+
+                            // ログイン成功時にWelcomePanelに遷移
+                            frame.getContentPane().removeAll();
+                            WelcomePanel welcomePanel = new WelcomePanel(frame);
+                            frame.getContentPane().add(welcomePanel);
+                            frame.setSize(GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
+                            frame.revalidate();
+                            frame.repaint();
                         } else {
                             JOptionPane.showMessageDialog(null, "Login failed. Invalid username or password.", "エラー", JOptionPane.ERROR_MESSAGE);
                         }
                     } catch (SQLException ex) {
-                        ex.printStackTrace();
+                        Logger.getLogger(LoginPanel.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
                         DatabaseConnector.closeConnection(connection);
                     }

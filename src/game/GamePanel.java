@@ -1,13 +1,13 @@
+package game;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.Random;
-import java.util.List; // List をインポート
+import java.util.List;
 import java.util.ArrayList; // ArrayList
 public class GamePanel extends JPanel implements ActionListener {
-
-    static final int SCREEN_WIDTH = 1300;
-    static final int SCREEN_HEIGHT = 750;
+    public static final int SCREEN_WIDTH = 1300;
+    public static final int SCREEN_HEIGHT = 750;
     static final int UNIT_SIZE = 50;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / (UNIT_SIZE * UNIT_SIZE);
     static final int DELAY = 175;
@@ -22,7 +22,7 @@ public class GamePanel extends JPanel implements ActionListener {
     Timer timer;
     Random random;
 
-    GamePanel() {
+    public GamePanel() {
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.black);
@@ -121,7 +121,6 @@ public class GamePanel extends JPanel implements ActionListener {
             if (applesEaten % 6 == 3) {
                 for (int i = 0; i < 3; i++) {
                     createObstacle();
-                    System.out.println("障害物を生成");
                 }
             }
         }
